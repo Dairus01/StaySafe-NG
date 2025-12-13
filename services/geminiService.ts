@@ -124,10 +124,10 @@ export const fetchRealTimeIntel = async (): Promise<DashboardData> => {
     Based on the search results, generate a valid JSON object.
     
     CRITICAL INSTRUCTION FOR SOURCE URLs:
-    - You MUST extract the ACTUAL, ORIGINAL news article URL (e.g., https://punchng.com/..., https://dailypost.ng/...).
-    - DO NOT use Google redirect links (links starting with https://vertexaisearch.cloud.google.com or similar).
-    - If the direct URL is hidden behind a redirect, attempt to resolve it or leave the field empty.
-    - Providing the actual source domain is better than a redirect link.
+    - You MUST extract the ACTUAL, ORIGINAL news article URL (e.g., https://punchng.com/incident-details, https://dailypost.ng/2024/...).
+    - DO NOT provide homepages (e.g., https://www.legit.ng/, https://punchng.com/).
+    - DO NOT use Google redirect links.
+    - If a specific article URL is not found, leave the sourceUrl field EMPTY.
 
     The JSON structure must be exactly as follows:
     {
@@ -201,6 +201,20 @@ export const fetchRealTimeIntel = async (): Promise<DashboardData> => {
           }
         }
 
+        // Filter out root domains (generic homepages)
+        // If url is just "https://site.com/" or "https://site.com", kill it
+        if (url) {
+          try {
+            const urlObj = new URL(url);
+            // A root path usually has pathname "/" or ""
+            if (urlObj.pathname === '/' || urlObj.pathname === '') {
+              url = '';
+            }
+          } catch (e) {
+            // invalid url, kill it
+            url = '';
+          }
+        }
         return {
           ...inc,
           sourceUrl: url,

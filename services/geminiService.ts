@@ -3,7 +3,6 @@ import { SecurityTip, Incident } from '../types';
 
 // Initialize Gemini Client
 // Using backup key provided by user due to quota limits
-const apiKey = 'AIzaSyAgrf4pN3L0gkNSBv-cL2eGcVt_IuqZZT0';
 
 const ai = new GoogleGenAI({ apiKey });
 

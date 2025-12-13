@@ -2,11 +2,11 @@
 
 StaySafe NG is a cutting-edge, open-source security intelligence platform designed to provide real-time situational awareness for residents and travelers in Nigeria. By leveraging **Google's Gemini AI**, the platform aggregates, validates, and visualizes security data to help users make informed decisions about their safety.
 
-## 🚀 Overview
+##  Overview
 
 In an era where accurate and timely information is critical, StaySafe NG bridges the gap between scattered news reports and actionable intelligence. The application monitors kidnapping, banditry, and road accident trends across Nigeria, offering features like route risk analysis, live incident mapping, and an AI-powered security assistant.
 
-## ✨ Key Features
+##  Key Features
 
 ### 1. **Live Security Dashboard**
 *   **Real-Time Data**: Automatically aggregated security incidents (last 7 days) categorized by type (Kidnappings, Banditry, Accidents, etc.).
@@ -33,7 +33,7 @@ In an era where accurate and timely information is critical, StaySafe NG bridges
 *   **Dark Mode**: Fully supported dark/light themes for comfortable viewing in any environment.
 *   **Responsive**: Optimized for mobile devices for on-the-go access.
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 *   **Frontend**: React 18 (TypeScript), Vite
 *   **AI Engine**: Google Gemini 2.5 Flash (via Google GenAI SDK)
@@ -43,7 +43,7 @@ In an era where accurate and timely information is critical, StaySafe NG bridges
 *   **Icons**: Lucide React
 *   **State Management**: React Hooks & Context
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 Follow these steps to get the project running on your local machine.
 

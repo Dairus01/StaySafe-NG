@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { 
-  Menu, X, Sun, Moon, Shield, Navigation, 
-  Activity, Users, Bell, MessageSquare 
+import {
+  Menu, X, Sun, Moon, Shield, Navigation,
+  Activity, Users, Bell, MessageSquare
 } from './components/ui/Icons';
 import Dashboard from './components/Dashboard';
 import MapDisplay from './components/MapDisplay';
@@ -17,7 +17,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  const [chatMessages, setChatMessages] = useState<{role: 'user'|'model', text: string}[]>([
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'model', text: string }[]>([
     { role: 'model', text: 'Hello, I am the StaySafe NG Security Assistant. How can I help you navigate safely today?' }
   ]);
   const [isChatThinking, setIsChatThinking] = useState(false);
@@ -50,32 +50,32 @@ function App() {
     setIsChatThinking(true);
 
     try {
-        // Construct history for the API
-        const history = chatMessages.map(m => ({
-            role: m.role,
-            parts: [{ text: m.text }]
-        }));
+      // Construct history for the API
+      const history = chatMessages.map(m => ({
+        role: m.role,
+        parts: [{ text: m.text }]
+      }));
 
-        const responseStream = await streamChatResponse(history, userMsg);
-        
-        let fullResponse = "";
-        setChatMessages(prev => [...prev, { role: 'model', text: '' }]); // Placeholder
+      const responseStream = await streamChatResponse(history, userMsg);
 
-        for await (const chunk of responseStream) {
-             const chunkText = chunk.text; // Access text property directly
-             if(chunkText) {
-                 fullResponse += chunkText;
-                 setChatMessages(prev => {
-                     const newHistory = [...prev];
-                     newHistory[newHistory.length - 1].text = fullResponse;
-                     return newHistory;
-                 });
-             }
+      let fullResponse = "";
+      setChatMessages(prev => [...prev, { role: 'model', text: '' }]); // Placeholder
+
+      for await (const chunk of responseStream) {
+        const chunkText = chunk.text; // Access text property directly
+        if (chunkText) {
+          fullResponse += chunkText;
+          setChatMessages(prev => {
+            const newHistory = [...prev];
+            newHistory[newHistory.length - 1].text = fullResponse;
+            return newHistory;
+          });
         }
+      }
     } catch (err) {
-        setChatMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting to the security network. Please try again." }]);
+      setChatMessages(prev => [...prev, { role: 'model', text: "I'm having trouble connecting to the security network. Please try again." }]);
     } finally {
-        setIsChatThinking(false);
+      setIsChatThinking(false);
     }
   };
 
@@ -98,11 +98,10 @@ function App() {
                 <button
                   key={item.id}
                   onClick={() => setView(item.id)}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    view === item.id 
-                      ? 'bg-primary/10 text-primary' 
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${view === item.id
+                      ? 'bg-primary/10 text-primary'
                       : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
+                    }`}
                 >
                   <item.icon className="h-4 w-4 mr-2" />
                   {item.label}
@@ -111,7 +110,7 @@ function App() {
             </div>
 
             <div className="flex items-center gap-2">
-               <button 
+              <button
                 onClick={() => setChatOpen(true)}
                 className="hidden md:flex items-center px-4 py-2 bg-primary hover:bg-primary-hover text-dark-900 rounded-full text-sm font-semibold transition-transform active:scale-95 shadow-lg shadow-primary/20"
               >
@@ -121,7 +120,7 @@ function App() {
               <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-dark-700 transition-colors">
                 {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
               </button>
-              <button 
+              <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300"
               >
@@ -141,11 +140,10 @@ function App() {
                   setView(item.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
-                  view === item.id 
-                    ? 'bg-primary/10 text-primary' 
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${view === item.id
+                    ? 'bg-primary/10 text-primary'
                     : 'text-gray-600 dark:text-gray-400'
-                }`}
+                  }`}
               >
                 <div className="flex items-center">
                   <item.icon className="h-5 w-5 mr-3" />
@@ -153,15 +151,15 @@ function App() {
                 </div>
               </button>
             ))}
-            <button 
-                onClick={() => {
-                    setChatOpen(true);
-                    setMobileMenuOpen(false);
-                }}
-                className="w-full mt-4 flex items-center justify-center px-4 py-3 bg-primary text-dark-900 rounded-lg font-bold"
+            <button
+              onClick={() => {
+                setChatOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full mt-4 flex items-center justify-center px-4 py-3 bg-primary text-dark-900 rounded-lg font-bold"
             >
-                <MessageSquare className="h-5 w-5 mr-2" />
-                Ask AI Assistant
+              <MessageSquare className="h-5 w-5 mr-2" />
+              Ask AI Assistant
             </button>
           </div>
         )}
@@ -179,12 +177,10 @@ function App() {
       <footer className="bg-white dark:bg-dark-800 border-t border-gray-200 dark:border-dark-700 mt-12 py-8">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            © 2024 StaySafe NG. Open Source Security Initiative.
+            © 2025 StaySafe NG. Open Source Security Initiative.
           </p>
           <div className="mt-4 flex justify-center gap-4 text-sm text-gray-400">
-             <a href="#" className="hover:text-primary">Privacy</a>
-             <a href="#" className="hover:text-primary">Terms</a>
-             <a href="#" className="hover:text-primary">GitHub</a>
+            <a href="https://github.com/Dairus01/StaySafe-NG" target="_blank" rel="noopener noreferrer" className="hover:text-primary">GitHub</a>
           </div>
         </div>
       </footer>
@@ -194,61 +190,59 @@ function App() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white dark:bg-dark-800 w-full max-w-lg rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 flex flex-col max-h-[80vh]">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-dark-700">
-               <div className="flex items-center gap-2">
-                 <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                 <h3 className="font-bold text-lg">AI Security Chief</h3>
-               </div>
-               <button onClick={() => setChatOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-dark-700 rounded">
-                 <X className="h-5 w-5" />
-               </button>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                <h3 className="font-bold text-lg">AI Security Chief</h3>
+              </div>
+              <button onClick={() => setChatOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-dark-700 rounded">
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-               {chatMessages.map((msg, idx) => (
-                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                   <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${
-                     msg.role === 'user' 
-                       ? 'bg-primary text-dark-900 rounded-tr-none' 
-                       : 'bg-gray-100 dark:bg-dark-700 text-gray-800 dark:text-gray-200 rounded-tl-none'
-                   }`}>
-                     <div className={`prose prose-sm max-w-none break-words [&>p]:mb-1 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 ${
-                            msg.role === 'user' ? 'prose-p:text-dark-900 marker:text-dark-900' : 'dark:prose-invert prose-p:text-gray-800 dark:prose-p:text-gray-200'
-                        }`}>
-                        <ReactMarkdown>
-                            {msg.text}
-                        </ReactMarkdown>
-                     </div>
-                   </div>
-                 </div>
-               ))}
-               {isChatThinking && (
-                 <div className="flex justify-start">
-                   <div className="bg-gray-100 dark:bg-dark-700 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
-                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
-                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
-                   </div>
-                 </div>
-               )}
+              {chatMessages.map((msg, idx) => (
+                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user'
+                      ? 'bg-primary text-dark-900 rounded-tr-none'
+                      : 'bg-gray-100 dark:bg-dark-700 text-gray-800 dark:text-gray-200 rounded-tl-none'
+                    }`}>
+                    <div className={`prose prose-sm max-w-none break-words [&>p]:mb-1 [&>p:last-child]:mb-0 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4 ${msg.role === 'user' ? 'prose-p:text-dark-900 marker:text-dark-900' : 'dark:prose-invert prose-p:text-gray-800 dark:prose-p:text-gray-200'
+                      }`}>
+                      <ReactMarkdown>
+                        {msg.text}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {isChatThinking && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 dark:bg-dark-700 p-3 rounded-2xl rounded-tl-none flex items-center gap-2">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleChatSubmit} className="p-4 border-t border-gray-200 dark:border-dark-700">
-               <div className="relative">
-                 <input 
-                   type="text" 
-                   value={chatInput}
-                   onChange={(e) => setChatInput(e.target.value)}
-                   placeholder="Ask about route safety, incidents..."
-                   className="w-full bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-dark-600 rounded-full py-3 pl-4 pr-12 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
-                 />
-                 <button 
-                   type="submit"
-                   disabled={isChatThinking || !chatInput.trim()}
-                   className="absolute right-2 top-2 p-1.5 bg-primary text-dark-900 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform"
-                 >
-                   <Navigation className="h-5 w-5 rotate-90" fill="currentColor" />
-                 </button>
-               </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Ask about route safety, incidents..."
+                  className="w-full bg-gray-50 dark:bg-dark-900 border border-gray-300 dark:border-dark-600 rounded-full py-3 pl-4 pr-12 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                />
+                <button
+                  type="submit"
+                  disabled={isChatThinking || !chatInput.trim()}
+                  className="absolute right-2 top-2 p-1.5 bg-primary text-dark-900 rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform"
+                >
+                  <Navigation className="h-5 w-5 rotate-90" fill="currentColor" />
+                </button>
+              </div>
             </form>
           </div>
         </div>

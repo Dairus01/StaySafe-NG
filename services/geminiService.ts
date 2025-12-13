@@ -2,9 +2,12 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { SecurityTip, Incident } from '../types';
 
 // Initialize Gemini Client
-// Using backup key provided by user due to quota limits
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.error("Gemini API Key is missing! Please check .env.local");
+}
 
-const ai = new GoogleGenAI({ apiKey });
+const ai = new GoogleGenAI({ apiKey: apiKey || '' });
 
 const SYSTEM_INSTRUCTION = `You are the AI Security Chief for StaySafe NG, a platform monitoring insecurity in Nigeria. 
 Your role is to provide accurate, calm, and actionable security advice for travelers and residents.
@@ -18,63 +21,63 @@ const DB_KEY = 'staysafe_db_v2'; // Updated to v2 to store full dashboard state
 const LAST_FETCH_KEY = 'staysafe_last_update';
 
 export interface DashboardData {
-    incidents: Incident[];
-    trends: { name: string; incidents: number }[];
-    distribution: { name: string; value: number }[];
-    roadUpdates: any[];
+  incidents: Incident[];
+  trends: { name: string; incidents: number }[];
+  distribution: { name: string; value: number }[];
+  roadUpdates: any[];
 }
 
 // Helper to parse various date formats into sorting-friendly timestamps
 const parseIncidentDate = (dateStr: string): number => {
-    if (!dateStr) return 0;
-    
-    // 1. Try parsing absolute date strings (e.g. "December 5, 2024")
-    const parsed = Date.parse(dateStr);
-    if (!isNaN(parsed)) return parsed;
-    
-    // 2. Parse relative time strings
-    const now = Date.now();
-    const str = dateStr.toLowerCase().trim();
-    
-    if (str === 'just now' || str.includes('moments ago') || str.includes('seconds ago')) return now;
-    if (str.includes('today')) return now;
-    if (str.includes('yesterday')) return now - 24 * 60 * 60 * 1000;
-    
-    const timeMatch = str.match(/(\d+)\s+(min|minute|hour|hr|day|week|month|year)/);
-    if (timeMatch) {
-        const val = parseInt(timeMatch[1]);
-        const unit = timeMatch[2];
-        
-        if (unit.startsWith('min')) return now - val * 60 * 1000;
-        if (unit.startsWith('hour') || unit === 'hr') return now - val * 60 * 60 * 1000;
-        if (unit.startsWith('day')) return now - val * 24 * 60 * 60 * 1000;
-        if (unit.startsWith('week')) return now - val * 7 * 24 * 60 * 60 * 1000;
-        if (unit.startsWith('month')) return now - val * 30 * 24 * 60 * 60 * 1000;
-    }
-    
-    // Fallback: if we can't parse it, push it to the bottom or keep as is
-    return 0;
+  if (!dateStr) return 0;
+
+  // 1. Try parsing absolute date strings (e.g. "December 5, 2024")
+  const parsed = Date.parse(dateStr);
+  if (!isNaN(parsed)) return parsed;
+
+  // 2. Parse relative time strings
+  const now = Date.now();
+  const str = dateStr.toLowerCase().trim();
+
+  if (str === 'just now' || str.includes('moments ago') || str.includes('seconds ago')) return now;
+  if (str.includes('today')) return now;
+  if (str.includes('yesterday')) return now - 24 * 60 * 60 * 1000;
+
+  const timeMatch = str.match(/(\d+)\s+(min|minute|hour|hr|day|week|month|year)/);
+  if (timeMatch) {
+    const val = parseInt(timeMatch[1]);
+    const unit = timeMatch[2];
+
+    if (unit.startsWith('min')) return now - val * 60 * 1000;
+    if (unit.startsWith('hour') || unit === 'hr') return now - val * 60 * 60 * 1000;
+    if (unit.startsWith('day')) return now - val * 24 * 60 * 60 * 1000;
+    if (unit.startsWith('week')) return now - val * 7 * 24 * 60 * 60 * 1000;
+    if (unit.startsWith('month')) return now - val * 30 * 24 * 60 * 60 * 1000;
+  }
+
+  // Fallback: if we can't parse it, push it to the bottom or keep as is
+  return 0;
 };
 
 // Synchronous getter for instant load
 export const getStoredData = (): DashboardData | null => {
-    try {
-        const stored = localStorage.getItem(DB_KEY);
-        if (!stored) return null;
-        
-        const parsed: DashboardData = JSON.parse(stored);
-        
-        // Ensure incidents are sorted descending by timestamp when loaded from cache
-        // This fixes legacy unsorted data
-        if (parsed.incidents) {
-            parsed.incidents.sort((a, b) => (b.timestampMs || 0) - (a.timestampMs || 0));
-        }
-        
-        return parsed;
-    } catch (e) {
-        console.error("Failed to load local data", e);
-        return null;
+  try {
+    const stored = localStorage.getItem(DB_KEY);
+    if (!stored) return null;
+
+    const parsed: DashboardData = JSON.parse(stored);
+
+    // Ensure incidents are sorted descending by timestamp when loaded from cache
+    // This fixes legacy unsorted data
+    if (parsed.incidents) {
+      parsed.incidents.sort((a, b) => (b.timestampMs || 0) - (a.timestampMs || 0));
     }
+
+    return parsed;
+  } catch (e) {
+    console.error("Failed to load local data", e);
+    return null;
+  }
 };
 
 export const getTravelAdvisory = async (query: string): Promise<string> => {
@@ -95,20 +98,20 @@ export const getTravelAdvisory = async (query: string): Promise<string> => {
 };
 
 export const fetchRealTimeIntel = async (): Promise<DashboardData> => {
-    const now = Date.now();
-    
-    // 1. Load Existing Data
-    const cachedData = getStoredData(); // This now returns sorted data
-    let existingIncidents: Incident[] = cachedData?.incidents || [];
-    
-    // BACKFILL: Ensure existing incidents have timestamps for sorting if missing
-    existingIncidents = existingIncidents.map(inc => ({
-        ...inc,
-        timestampMs: inc.timestampMs || parseIncidentDate(inc.timestamp)
-    }));
+  const now = Date.now();
 
-    // Prompt to get NEW data
-    const prompt = `
+  // 1. Load Existing Data
+  const cachedData = getStoredData(); // This now returns sorted data
+  let existingIncidents: Incident[] = cachedData?.incidents || [];
+
+  // BACKFILL: Ensure existing incidents have timestamps for sorting if missing
+  existingIncidents = existingIncidents.map(inc => ({
+    ...inc,
+    timestampMs: inc.timestampMs || parseIncidentDate(inc.timestamp)
+  }));
+
+  // Prompt to get NEW data
+  const prompt = `
     Perform a Google Search to find confirmed security incidents in Nigeria from the LAST 7 DAYS.
     Aim to find at least 15-20 distinct incidents to help populate a security database.
     
@@ -157,97 +160,97 @@ export const fetchRealTimeIntel = async (): Promise<DashboardData> => {
     Check status for: F136 (Abuja-Kaduna), A1 (Lagos-Sokoto), A2 (PH-Kano), A3 (PH-Maiduguri), A122 (Ibadan-Benin).
     `;
 
-    try {
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                tools: [{ googleSearch: {} }],
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        tools: [{ googleSearch: {} }],
+      }
+    });
+
+    let jsonStr = response.text || '{}';
+    // Clean markdown code blocks if present
+    jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    const newData = JSON.parse(jsonStr);
+
+    // Collect grounding chunks to potentially recover URLs
+    const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
+    const validUrls = groundingChunks
+      .map(chunk => chunk.web?.uri)
+      .filter(uri => uri && !uri.includes('vertexaisearch.cloud.google.com'));
+
+    if (newData && newData.incidents && Array.isArray(newData.incidents)) {
+      // Fix URLs and Add Timestamps to new incidents
+      const processedNewIncidents = newData.incidents.map((inc: Incident) => {
+        let url = inc.sourceUrl;
+
+        // Fix Redirect URLs
+        if (url && url.includes('vertexaisearch.cloud.google.com')) {
+          if (validUrls.length > 0) {
+            try {
+              const urlObj = new URL(url);
+              const realUrl = urlObj.searchParams.get('url');
+              url = realUrl || '';
+            } catch (e) {
+              url = '';
             }
-        });
-        
-        let jsonStr = response.text || '{}';
-        // Clean markdown code blocks if present
-        jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        
-        const newData = JSON.parse(jsonStr);
-
-        // Collect grounding chunks to potentially recover URLs
-        const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
-        const validUrls = groundingChunks
-            .map(chunk => chunk.web?.uri)
-            .filter(uri => uri && !uri.includes('vertexaisearch.cloud.google.com'));
-
-        if (newData && newData.incidents && Array.isArray(newData.incidents)) {
-            // Fix URLs and Add Timestamps to new incidents
-            const processedNewIncidents = newData.incidents.map((inc: Incident) => {
-                let url = inc.sourceUrl;
-                
-                // Fix Redirect URLs
-                if (url && url.includes('vertexaisearch.cloud.google.com')) {
-                   if (validUrls.length > 0) {
-                       try {
-                           const urlObj = new URL(url);
-                           const realUrl = urlObj.searchParams.get('url'); 
-                           url = realUrl || '';
-                       } catch (e) {
-                           url = '';
-                       }
-                   } else {
-                       url = '';
-                   }
-                }
-
-                return { 
-                    ...inc, 
-                    sourceUrl: url,
-                    // Parse timestamp immediately for sorting
-                    timestampMs: parseIncidentDate(inc.timestamp)
-                };
-            });
-
-            // 2. Deduplication & Merging
-            const newUniqueIncidents = processedNewIncidents.filter((newInc: Incident) => {
-                return !existingIncidents.some((existing) => {
-                    if (newInc.sourceUrl && existing.sourceUrl === newInc.sourceUrl) return true;
-                    if (newInc.description === existing.description && newInc.location === existing.location) return true;
-                    return false;
-                });
-            });
-
-            // Merge
-            const combinedIncidents = [...newUniqueIncidents, ...existingIncidents];
-            
-            // 3. SORT BY TIMESTAMP (Newest First)
-            combinedIncidents.sort((a, b) => (b.timestampMs || 0) - (a.timestampMs || 0));
-            
-            // Limit database size
-            const trimmedIncidents = combinedIncidents.slice(0, 150);
-
-            // Construct full dashboard payload
-            const fullData: DashboardData = {
-                incidents: trimmedIncidents,
-                trends: newData.trends || cachedData?.trends || [],
-                distribution: newData.distribution || cachedData?.distribution || [],
-                roadUpdates: newData.roadUpdates || cachedData?.roadUpdates || []
-            };
-
-            // 4. Save to Storage
-            localStorage.setItem(DB_KEY, JSON.stringify(fullData));
-            localStorage.setItem(LAST_FETCH_KEY, now.toString());
-
-            console.log(`Merged ${newUniqueIncidents.length} new incidents. Total in DB: ${trimmedIncidents.length}`);
-
-            return fullData;
+          } else {
+            url = '';
+          }
         }
-        
-        // Return existing if parse failed but wrapped in correct structure
-        return cachedData || { incidents: [], trends: [], distribution: [], roadUpdates: [] };
 
-    } catch (error) {
-        console.error("Live Intel Error:", error);
-        return cachedData || { incidents: [], trends: [], distribution: [], roadUpdates: [] };
+        return {
+          ...inc,
+          sourceUrl: url,
+          // Parse timestamp immediately for sorting
+          timestampMs: parseIncidentDate(inc.timestamp)
+        };
+      });
+
+      // 2. Deduplication & Merging
+      const newUniqueIncidents = processedNewIncidents.filter((newInc: Incident) => {
+        return !existingIncidents.some((existing) => {
+          if (newInc.sourceUrl && existing.sourceUrl === newInc.sourceUrl) return true;
+          if (newInc.description === existing.description && newInc.location === existing.location) return true;
+          return false;
+        });
+      });
+
+      // Merge
+      const combinedIncidents = [...newUniqueIncidents, ...existingIncidents];
+
+      // 3. SORT BY TIMESTAMP (Newest First)
+      combinedIncidents.sort((a, b) => (b.timestampMs || 0) - (a.timestampMs || 0));
+
+      // Limit database size
+      const trimmedIncidents = combinedIncidents.slice(0, 150);
+
+      // Construct full dashboard payload
+      const fullData: DashboardData = {
+        incidents: trimmedIncidents,
+        trends: newData.trends || cachedData?.trends || [],
+        distribution: newData.distribution || cachedData?.distribution || [],
+        roadUpdates: newData.roadUpdates || cachedData?.roadUpdates || []
+      };
+
+      // 4. Save to Storage
+      localStorage.setItem(DB_KEY, JSON.stringify(fullData));
+      localStorage.setItem(LAST_FETCH_KEY, now.toString());
+
+      console.log(`Merged ${newUniqueIncidents.length} new incidents. Total in DB: ${trimmedIncidents.length}`);
+
+      return fullData;
     }
+
+    // Return existing if parse failed but wrapped in correct structure
+    return cachedData || { incidents: [], trends: [], distribution: [], roadUpdates: [] };
+
+  } catch (error) {
+    console.error("Live Intel Error:", error);
+    return cachedData || { incidents: [], trends: [], distribution: [], roadUpdates: [] };
+  }
 }
 
 export const generateSecurityTips = async (category: string): Promise<SecurityTip[]> => {
@@ -265,7 +268,7 @@ export const generateSecurityTips = async (category: string): Promise<SecurityTi
 
     const text = response.text;
     if (!text) return [];
-    
+
     const parsed = JSON.parse(text);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return parsed.map((item: any, index: number) => ({
@@ -308,17 +311,17 @@ export const generateArticleContent = async (title: string): Promise<string> => 
   }
 };
 
-export const streamChatResponse = async (history: {role: string, parts: {text: string}[]}[], newMessage: string) => {
-    try {
-        const chat = ai.chats.create({
-            model: 'gemini-2.5-flash',
-            config: { systemInstruction: SYSTEM_INSTRUCTION },
-            history: history
-        });
-        
-        return await chat.sendMessageStream({ message: newMessage });
-    } catch (error) {
-        console.error("Chat Stream Error", error);
-        throw error;
-    }
+export const streamChatResponse = async (history: { role: string, parts: { text: string }[] }[], newMessage: string) => {
+  try {
+    const chat = ai.chats.create({
+      model: 'gemini-2.5-flash',
+      config: { systemInstruction: SYSTEM_INSTRUCTION },
+      history: history
+    });
+
+    return await chat.sendMessageStream({ message: newMessage });
+  } catch (error) {
+    console.error("Chat Stream Error", error);
+    throw error;
+  }
 }

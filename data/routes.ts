@@ -129,3 +129,4 @@ export const FEDERAL_ROADS: Route[] = [
   { id: 'F138', name: 'F138: Zaria - Kano', start: 'Zaria', end: 'Kano', riskLevel: 'High Risk', avgSpeed: '80 km/h', activeIncidents: 4, coordinates: [[11.08, 7.71], [12.00, 8.52]] },
   { id: 'F139', name: 'F139: East-West Road', start: 'Warri', end: 'Eket', riskLevel: 'Caution', avgSpeed: '65 km/h', activeIncidents: 3, coordinates: [[5.55, 5.79], [4.78, 7.00], [4.65, 7.93]] }
 ];
+

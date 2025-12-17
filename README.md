@@ -115,3 +115,4 @@ This project is open-source and available under the **MIT License**.
 <p align="center">
   <small>Built with ❤️ for a Safer Nigeria.</small>
 </p>
+

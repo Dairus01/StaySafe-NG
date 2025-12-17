@@ -2,9 +2,9 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { SecurityTip, Incident } from '../types';
 
 // Initialize Gemini Client
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 if (!apiKey) {
-  console.error("Gemini API Key is missing! Please check .env.local");
+  console.error("Gemini API Key is missing! Please check Vercel Environment Variables for VITE_GEMINI_API_KEY");
 }
 
 const ai = new GoogleGenAI({ apiKey: apiKey || '' });

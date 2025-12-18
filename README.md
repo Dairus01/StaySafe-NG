@@ -117,6 +117,7 @@ This project is open-source and available under the **MIT License**.
 *   **Dairus Okoh** - Team Lead
 *   **Mayowa Titilola** - Data Scientist
 *   **David Akhabue** - ML Engineer
+*   **Eniola Titilola** - Technical Writer
 
 <p align="center">
   <small>Built with ❤️ for a Safer Nigeria.</small>

@@ -1,6 +1,6 @@
 # StaySafe NG | AI Security Intelligence Platform
 
-StaySafe NG is a cutting-edge, open-source security intelligence platform designed to provide real-time situational awareness for residents and travelers in Nigeria. By leveraging **Google's Gemini AI**, the platform aggregates, validates, and visualizes security data to help users make informed decisions about their safety.
+StaySafe NG is a cutting-edge, open-source security intelligence AI  powered platform designed to provide real-time situational awareness for residents and travelers in Nigeria. By leveraging **Google's Gemini AI**, the platform aggregates, validates, and visualizes security data to help users make informed decisions about their safety.
 
 ##  Overview
 
